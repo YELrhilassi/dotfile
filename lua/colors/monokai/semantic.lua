@@ -1,49 +1,101 @@
-local palette = require("colors.monokai.palette")
-local util = require("colors.monokai.util")
+-- Semantic highlighting for languages through Treesitter
+local c = require('colors.monokai.palette')
 
-  return {
-  -- LSP semantic tokens
-  ["@lsp.type.class"]         = { fg = palette.atlantis },
-  ["@lsp.type.decorator"]     = { fg = palette.lavender },
-  ["@lsp.type.enum"]          = { fg = palette.spray },
-  ["@lsp.type.function"]      = { fg = palette.pear },
-  ["@lsp.type.interface"]     = { fg = palette.malibu },
-  ["@lsp.type.macro"]         = { fg = palette.radical_red },
-  ["@lsp.type.method"]        = { fg = palette.pear },
-  ["@lsp.type.namespace"]     = { fg = palette.spray },
-  ["@lsp.type.parameter"]     = { fg = palette.fg },
-  ["@lsp.type.property"]      = { fg = palette.malibu },
-  ["@lsp.type.struct"]        = { fg = palette.atlantis },
-  ["@lsp.type.type"]          = { fg = palette.spray },
-  ["@lsp.type.typeParameter"] = { fg = palette.malibu },
-  ["@lsp.type.variable"]      = { fg = palette.fg },
+return {
+  -- Treesitter highlights
+  ["@attribute"] = { fg = c.purple },
+  ["@boolean"] = { fg = c.pink},
+  ["@character"] = { fg = c.string },
+  ["@comment"] = { link = "Comment" },
+  ["@conditional"] = { fg = c.pink},
+  ["@constant"] = { fg = c.blue_light, italic = true },
+  ["@constant.builtin"] = { fg = c.blue_light, italic = true },
+  ["@constant.macro"] = { fg = c.blue_light, italic = true },
+  ["@constructor"] = { fg = c.blue },
+  ["@exception"] = { fg = c.blue_light, italic = true },
+  ["@field"] = { fg = c.fg },
+  ["@float"] = { link = "Float" },
+  ["@function"] = { fg = c.blue_light, italic = true },
+  ["@function.builtin"] = { fg = c.blue_light, italic = true },
+  ["@function.macro"] = { fg = c.blue_light, italic = true },
+  ["@include"] = { fg = c.red},
+  ["@keyword"] = { fg = c.red},
+  ["@keyword.function"] = { fg = c.blue_light, italic = true },
+  ["@keyword.operator"] = { fg = c.blue_light, italic = true },
+  ["@keyword.return"] = { fg = c.red},
+  ["@label"] = { link = "Label" },
+  ["@method"] = { fg = c.green_light },
+  ["@namespace"] = { fg = c.blue },
+  ["@number"] = { link = "Number" },
+  ["@operator"] = { link = "Operator" },
+  ["@parameter"] = { fg = c.orange },
+  ["@parameter.reference"] = { fg = c.orange },
+  ["@property"] = { fg = c.fg },
+  ["@punctuation.bracket"] = { fg = c.fg },
+  ["@punctuation.delimiter"] = { fg = c.fg },
+  ["@punctuation.special"] = { fg = c.pink },
+  ["@repeat"] = { link = "Repeat" },
+  ["@string"] = { link = "String" },
+  ["@string.escape"] = { fg = c.pink },
+  ["@string.regex"] = { fg = c.string },
+  ["@string.special"] = { fg = c.string },
+  ["@structure"] = { fg = c.pink },
+  ["@tag"] = { fg = c.pink },
+  ["@tag.attribute"] = { fg = c.orange },
+  ["@tag.delimiter"] = { fg = c.fg },
+  ["@text"] = { fg = c.fg },
+  ["@text.emphasis"] = { italic = true },
+  ["@text.reference"] = { fg = c.blue },
+  ["@text.strong"] = { bold = true },
+  ["@text.title"] = { fg = c.blue, bold = true },
+  ["@text.underline"] = { underline = true },
+  ["@text.uri"] = { fg = c.string, underline = true },
+  ["@type"] = { link = "Type" },
+  ["@type.builtin"] = { fg = c.blue },
+  ["@variable"] = { fg = c.fg },
+  ["@variable.builtin"] = { fg = c.purple },
   
-  -- Treesitter groups
-  ["@constructor"]            = { fg = palette.spray },
-  ["@exception"]              = { fg = palette.radical_red },
-  ["@field"]                  = { fg = palette.malibu },
-  ["@include"]                = { fg = palette.radical_red },
-  ["@parameter"]              = { fg = palette.fg },
-  ["@property"]               = { fg = palette.malibu },
-  ["@punctuation.bracket"]   = { fg = palette.gold },       -- ()
-  ["@punctuation.delimiter"] = { fg = palette.gold_alt },   -- {}
-  ["@punctuation.special"]   = { fg = palette.gold },       -- []
-  ["@tag"]                    = { fg = palette.radical_red },
-  ["@tag.attribute"]          = { fg = palette.pear },
-  ["@tag.delimiter"]          = { fg = palette.fuchsia },
-
-
-   -- JavaScript/TypeScript specific
-  ["@keyword.function"]       = { fg = palette.light_blue },
-  ["@keyword"]               = { fg = palette.light_blue },  -- const, let, var
-  ["@keyword.operator"]      = { fg = palette.pink },       -- =, +, -, etc.
-  ["@keyword.return"]        = { fg = palette.light_blue },
-  ["@keyword.import"]        = { fg = palette.light_blue },
-  ["@keyword.export"]        = { fg = palette.light_blue },
+  -- Extended treesitter captures
+  ["@definition"] = { fg = c.blue_light, underline = true },
+  ["@definition.class"] = { fg = c.blue },
+  ["@definition.function"] = { fg = c.green_light },
+  ["@definition.method"] = { fg = c.green_light },
+  ["@definition.var"] = { fg = c.fg },
+  ["@error"] = { fg = c.error },
+  ["@module"] = { fg = c.blue },
+  ["@none"] = { fg = c.fg },
+  ["@preproc"] = { link = "PreProc" },
+  ["@scope"] = { bold = true },
+  ["@text.literal"] = { fg = c.string },
+  ["@text.todo"] = { link = "Todo" },
+  ["@text.warning"] = { fg = c.warning },
+  ["@text.danger"] = { fg = c.error },
   
- 
+  -- Specific language overrides
+  -- HTML/JSX specific
+  ["@tag.jsx"] = { fg = c.pink },
+  ["@constructor.jsx"] = { fg = c.pink },
+  ["@tag.attribute.jsx"] = { fg = c.orange },
   
-  -- Treesitter context (lighter background)
-  TreesitterContext          = { bg = util.darken(palette.current_line, 10) },
-  TreesitterContextLineNumber = { fg = palette.tree_poppy },
+  -- CSS specific
+  ["@property.css"] = { fg = c.blue },
+  ["@number.css"] = { fg = c.number },
+  ["@string.css"] = { fg = c.string },
+  
+  -- Markdown specific
+  ["@text.title.1.markdown"] = { fg = c.pink, bold = true },
+  ["@text.title.2.markdown"] = { fg = c.orange, bold = true },
+  ["@text.title.3.markdown"] = { fg = c.green_light, bold = true },
+  ["@text.title.4.markdown"] = { fg = c.blue, bold = true },
+  ["@text.title.5.markdown"] = { fg = c.purple, bold = true },
+  ["@text.title.6.markdown"] = { fg = c.blue_light, bold = true },
+  ["@text.literal.markdown"] = { fg = c.fg, bg = c.bg_light },
+  ["@text.literal.markdown_inline"] = { fg = c.fg, bg = c.bg_light },
+  ["@punctuation.special.markdown"] = { fg = c.orange, bold = true },
+  
+  -- JSON specific
+  ["@label.json"] = { fg = c.blue },
+  ["@string.json"] = { fg = c.string },
+  ["@number.json"] = { fg = c.number },
+  ["@boolean.json"] = { fg = c.purple },
 }

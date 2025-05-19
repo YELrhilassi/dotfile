@@ -33,3 +33,12 @@ vim.opt.splitright = true
 
 -- Clipboard
 vim.opt.clipboard = "unnamedplus"
+
+-- Scroll 
+vim.opt.scrolloff = 8
+
+-- Messages
+vim.opt.shortmess:append("F")  -- Don't show file info when editing
+vim.opt.shortmess:append("c")  -- Don't show completion messages
+vim.opt.shortmess:append("I")  -- Disable intro message
+

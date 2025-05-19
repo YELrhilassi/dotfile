@@ -4,6 +4,11 @@ return {
   lazy = false,
   priority = 1000,
   config = function ()
-    require("colors.monokai").load()
+    require("colors.monokai").setup(
+      {transparent_background = false, -- Set to true for transparent background
+
+  
+      overrides = {}}
+    )
   end,
 }
