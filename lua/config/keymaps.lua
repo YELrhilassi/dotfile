@@ -6,12 +6,6 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.keymap.set({ 'n', 'v' }, '<space>', '<Nop>', { silent = true })
 
--- Save & quit
--- keymap('n', "<C-s>",  utils.smart_save, {desc = "Smart save"})
--- keymap("i", "<C-s>", function()
---   vim.cmd("stopinsert")
---   utils.smart_save()
--- end, { desc = "Smart save in insert mode" })
 vim.keymap.set('n', '<C-s>', function() require('utils').save_file(false) end, { desc = "Save file" })
 vim.keymap.set('i', '<C-s>', function()
   vim.cmd('stopinsert')
@@ -85,7 +79,7 @@ keymap('n', '<leader>v', '<C-w>v', opts)
 keymap('n', '<leader>h', '<C-w>s', opts)
 keymap('n', '<leader>ww', '<C-w>=', opts)
 keymap('n', '<leader>wx', ':close<CR>', opts)
-
+  
 -- Tabs
 keymap('n', '<leader>to', ':tabnew<CR>', opts)   -- open new tab
 keymap('n', '<leader>tx', ':tabclose<CR>', opts) -- close current tab
@@ -101,3 +95,18 @@ keymap('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostics l
 
 -- Telescope
 keymap("n", "<leader>fp", "<cmd>Telescope projects<CR>", opts)
+
+
+-- Which key 
+vim.keymap.set("n", "<leader><leader>", function()
+  require("which-key").show("<leader>")
+end, { desc = "Show which-key" })
+
+
+
+vim.keymap.set("n", "<leader>f", function()
+  require("conform").format({
+    lsp_fallback = true,
+    timeout_ms = 1000,
+  })
+end, { desc = "Format file", noremap = true, silent = true })
