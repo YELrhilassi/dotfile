@@ -1,4 +1,30 @@
+local on_attach = function(client, bufnr)
+
+  local bufmap = function(mode, lhs, rhs, desc)
+    vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+  end
+
+  -- disable formatting (we use null-ls/prettier)
+  client.server_capabilities.documentFormattingProvider = false
+  client.server_capabilities.documentRangeFormattingProvider = false
+
+  -- LSP navigation
+  bufmap("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
+  bufmap("n", "gd", vim.lsp.buf.definition, "Go to definition")
+  bufmap("n", "K", vim.lsp.buf.hover, "Hover docs")
+  bufmap("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
+  bufmap("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+bufmap("n", "<leader>n", "*", "Search next occurrence")
+bufmap("n", "<leader>N", "#", "Search previous occurrence")  -- bufmap("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
+  bufmap("n", "gr", vim.lsp.buf.references, "References")
+  bufmap("n", "<leader>D", vim.lsp.buf.type_definition, "")
+  bufmap("n", "[d", vim.diagnostic.goto_prev, "Prev diagnostic")
+  bufmap("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
+  bufmap("n", "<leader>q", vim.diagnostic.setloclist, "Diagnostics to loclist")
+end
+
 return {
+
   {
     "williamboman/mason.nvim",
     build = ":MasonUpdate",
@@ -22,8 +48,7 @@ return {
     dependencies = { "williamboman/mason.nvim" },
     config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = {
-          -- Removed tsserver since we're using typescript-tools.nvim
+        ensure_installed       = {
           "html",        -- HTML
           "cssls",       -- CSS
           "tailwindcss", -- TailwindCSS
@@ -35,6 +60,7 @@ return {
           "emmet_ls",    -- Emmet support
         },
         automatic_installation = true,
+        automatic_enable       = false,
       })
     end,
   },
@@ -48,6 +74,7 @@ return {
     config = function()
       -- Common capabilities with LSP and autocompletion support
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      capabilities.textDocument.semanticHighlighting = true
       capabilities.textDocument.completion.completionItem.snippetSupport = true
       capabilities.textDocument.completion.completionItem.preselectSupport = true
       capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
@@ -137,32 +164,11 @@ return {
       ]])
 
       -- LSP keymaps
-      local on_attach = function(client, bufnr)
-        local bufmap = function(mode, lhs, rhs, desc)
-          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
-        end
-
-        -- disable formatting (we use null-ls/prettier)
-        client.server_capabilities.documentFormattingProvider = false
-        client.server_capabilities.documentRangeFormattingProvider = false
-
-        -- LSP navigation
-        bufmap("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
-        bufmap("n", "gd", vim.lsp.buf.definition, "Go to definition")
-        bufmap("n", "K", vim.lsp.buf.hover, "Hover docs")
-        bufmap("n", "gi", vim.lsp.buf.implementation, "Go to implementation")
-        bufmap("n", "<leader>rn", vim.lsp.buf.rename, "Rename symbol")
-        -- bufmap("n", "<leader>ca", vim.lsp.buf.code_action, "Code action")
-        bufmap("n", "gr", vim.lsp.buf.references, "References")
-        bufmap("n", "<leader>D", vim.lsp.buf.type_definition, "")
-        bufmap("n", "[d", vim.diagnostic.goto_prev, "Prev diagnostic")
-        bufmap("n", "]d", vim.diagnostic.goto_next, "Next diagnostic")
-        bufmap("n", "<leader>q", vim.diagnostic.setloclist, "Diagnostics to loclist")
-      end
 
       -- Setup language servers
       local lspconfig = require("lspconfig")
       local util = require("lspconfig.util")
+
 
       -- HTML
       lspconfig.html.setup({
@@ -527,29 +533,43 @@ return {
     "stevearc/conform.nvim",
     config = function()
       require("conform").setup({
-        formatters_by_ft = {
-          lua = { "stylua" },
-          python = { "isort", "black" },
-          javascript = { "prettier" },
-          javascriptreact = { "prettier" },
-          typescript = { "prettier" },
-          typescriptreact = { "prettier" },
-          css = { "prettier" },
-          html = { "prettier" },
-          json = { "prettier" },
-          yaml = { "prettier" },
-          markdown = { "prettier" },
-          graphql = { "prettier" },
-          dockerfile = { "hadolint" },
-          sh = { "shfmt" },
-        },
-        format_on_save = {
-          timeout_ms = 500,
-          lsp_fallback = true,
-        },
-      })
-    end,
-  }, {
+  -- ✅ Define the custom formatter
+  formatters = {
+    prettier_custom = {
+      command = "prettier",
+      args = {
+        "--stdin-filepath",
+        "$FILENAME",
+        "--config",
+        vim.fn.expand("~/.config/nvim/.prettierrc.json"),
+      },
+      stdin = true,
+    },
+  },
+
+  -- ✅ Reference the formatter by name
+  formatters_by_ft = {
+    lua = {"stylua"},
+    javascript = { "prettier_custom" },
+    javascriptreact = { "prettier_custom" },
+    typescript = { "prettier_custom" },
+    typescriptreact = { "prettier_custom" },
+    json = { "prettier_custom" },
+    yaml = { "prettier_custom" },
+    markdown = { "prettier_custom" },
+    html = { "prettier_custom" },
+    css = { "prettier_custom" },
+  },
+
+  -- ✅ Optional: Format on save
+  format_on_save = {
+    timeout_ms = 5000,
+    lsp_fallback = true,
+  },
+})   
+  end,
+  },
+  {
   "norcalli/nvim-colorizer.lua",
   ft = { "css", "scss", "html", "javascript", "typescript", "javascriptreact", "typescriptreact" },
   config = function()
@@ -599,11 +619,81 @@ return {
     "pmizio/typescript-tools.nvim",
     dependencies = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
     config = function()
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      -- Explicitly enable semantic tokens
+      capabilities.textDocument.semanticTokens = {
+        requests = {
+          range = true,
+          full = {
+            delta = true
+          }
+        },
+        tokenTypes = {
+          "namespace", "type", "class", "enum", "interface", "struct", "typeParameter", "parameter",
+          "variable", "property", "enumMember", "event", "function", "method", "macro", "keyword",
+          "modifier", "comment", "string", "number", "regexp", "operator", "decorator"
+        },
+        tokenModifiers = {
+          "declaration", "definition", "readonly", "static", "deprecated", "abstract", "async",
+          "modification", "documentation", "defaultLibrary"
+        }
+      }
+
+      capabilities.textDocument.semanticHighlighting = true
+      capabilities.textDocument.completion.completionItem.snippetSupport = true
+      capabilities.textDocument.completion.completionItem.preselectSupport = true
+      capabilities.textDocument.completion.completionItem.insertReplaceSupport = true
+      capabilities.textDocument.completion.completionItem.labelDetailsSupport = true
+      capabilities.textDocument.completion.completionItem.deprecatedSupport = true
+      capabilities.textDocument.completion.completionItem.commitCharactersSupport = true
+      capabilities.textDocument.completion.completionItem.tagSupport = { valueSet = { 1 } }
+      capabilities.textDocument.completion.completionItem.resolveSupport = {
+        properties = {
+          "documentation",
+          "detail",
+          "additionalTextEdits",
+        },
+      }
+
+      -- Enhanced on_attach function for typescript-tools
+      local enhanced_on_attach = function(client, bufnr)
+        -- Call the original on_attach function
+        on_attach(client, bufnr)
+
+        -- Enable semantic tokens if available
+        if client.server_capabilities.semanticTokensProvider then
+          vim.lsp.semantic_tokens.start(bufnr, client.id)
+        end
+
+        -- TypeScript-specific keymaps
+        local bufmap = function(mode, lhs, rhs, desc)
+          vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
+        end
+
+        bufmap("n", "<leader>to", "<cmd>TSToolsOrganizeImports<cr>", "Organize Imports")
+        bufmap("n", "<leader>ts", "<cmd>TSToolsSortImports<cr>", "Sort Imports")
+        bufmap("n", "<leader>tr", "<cmd>TSToolsRemoveUnusedImports<cr>", "Remove Unused Imports")
+        bufmap("n", "<leader>tf", "<cmd>TSToolsFixAll<cr>", "Fix All")
+        bufmap("n", "<leader>ta", "<cmd>TSToolsAddMissingImports<cr>", "Add Missing Imports")
+      end
+
       require("typescript-tools").setup({
-        on_attach = on_attach,
+        on_attach = enhanced_on_attach,
         capabilities = capabilities,
         settings = {
-          expose_as_code_action = { "fix_all", "add_missing_imports", "remove_unused" },
+          -- Enable semantic tokens
+          separate_diagnostic_server = true,
+          publish_diagnostic_on = "insert_leave",
+
+          expose_as_code_action = {
+            "fix_all",
+            "add_missing_imports",
+            "remove_unused",
+            "remove_unused_imports",
+            "organize_imports"
+          },
+
           tsserver_file_preferences = {
             includeInlayParameterNameHints = "all",
             includeInlayParameterNameHintsWhenArgumentMatchesName = false,
@@ -611,7 +701,10 @@ return {
             includeInlayVariableTypeHints = true,
             includeInlayPropertyDeclarationTypeHints = true,
             includeInlayFunctionLikeReturnTypeHints = true,
+            includeCompletionsForModuleExports = true,
+            quotePreference = "auto",
           },
+
           tsserver_format_options = {
             insertSpaceAfterCommaDelimiter = true,
             insertSpaceAfterSemicolonInForStatements = true,
@@ -628,6 +721,11 @@ return {
             placeOpenBraceOnNewLineForFunctions = false,
             placeOpenBraceOnNewLineForControlBlocks = false,
           },
+
+          -- Additional settings to improve highlighting
+          tsserver_plugins = {},
+          complete_function_calls = true,
+          include_completions_with_insert_text = true,
         },
       })
     end,
