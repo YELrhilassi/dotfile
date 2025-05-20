@@ -9,7 +9,8 @@ M.load = function()
     require('colors.monokai.plugins.lualine'),
     require('colors.monokai.plugins.notify'),
     require('colors.monokai.plugins.rainbow'),
-    require('colors.monokai.plugins.treesitter')
+    require('colors.monokai.plugins.treesitter'),
+    require('colors.monokai.plugins.blankline')
   )
 end
 

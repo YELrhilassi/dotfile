@@ -3,12 +3,14 @@ return {
   dir = vim.fn.stdpath("config") .. "/lua/colors/monokai",
   lazy = false,
   priority = 1000,
-  config = function ()
+  config = function()
     require("colors.monokai").setup(
-      {transparent_background = false, -- Set to true for transparent background
+      {
+        transparent_background = false, -- Set to true for transparent background
 
-  
-      overrides = {}}
+
+        overrides = {}
+      }
     )
   end,
 }
